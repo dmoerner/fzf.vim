@@ -16,48 +16,19 @@ fi
 
 IFS=':' read -r -a INPUT <<< "$1"
 
-case ${#INPUT[@]} in
-  1)
-    FILE=${INPUT[0]}
-    CENTER=''
-    ;;
-  2)
-    if [[ ${INPUT[1]} =~ ^[0-9]+$ ]]; then
-      FILE=${INPUT[0]}
-      CENTER=${INPUT[1]}
-    else
-      FILE=${INPUT[0]}:${INPUT[1]}
-      CENTER=''
-    fi
-    ;;
-  3)
-    FILE=${INPUT[0]}:${INPUT[1]}
-    CENTER=${INPUT[2]}
-    ;;
-  *)
-    FILE=${INPUT[0]}
-    CENTER=${INPUT[1]}
-    ;;
-esac
+FILE="${INPUT[0]}"
+CENTER=''
 
-if [[ -n "$CENTER" && ! "$CENTER" =~ ^[0-9] ]]; then
-  exit 1
-fi
-CENTER=${CENTER/[^0-9]*/}
+unset INPUT[0]
 
-# MS Win support
-if [[ $FILE =~ '\' ]]; then
-  if [ -z "$MSWINHOME" ]; then
-    MSWINHOME="$HOMEDRIVE$HOMEPATH"
+for FIELD in ${INPUT[@]}; do
+  if [[ "$FIELD" =~ ^[0-9]+$ ]]; then
+    CENTER="$FIELD"
+    break
+  else
+    FILE="$FILE":"$FIELD"
   fi
-  if grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null ; then
-    MSWINHOME="${MSWINHOME//\\/\\\\}"
-    FILE="${FILE/#\~\\/$MSWINHOME\\}"
-    FILE=$(wslpath -u "$FILE")
-  elif [ -n "$MSWINHOME" ]; then
-    FILE="${FILE/#\~\\/$MSWINHOME\\}"
-  fi
-fi
+done
 
 FILE="${FILE/#\~\//$HOME/}"
 if [ ! -r "$FILE" ]; then
@@ -98,3 +69,4 @@ eval "$CMD" 2> /dev/null | awk "{ \
         { gsub(/\x1b[[0-9;]*m/, \"&$REVERSE\"); printf(\"$REVERSE%s\n$RESET\", \$0); } \
     else printf(\"$RESET%s\n\", \$0); \
     }"
+
