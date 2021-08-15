@@ -15,13 +15,30 @@ if [ "$1" = --tag ]; then
 fi
 
 IFS=':' read -r -a INPUT <<< "$1"
-FILE=${INPUT[0]}
-CENTER=${INPUT[1]}
 
-if [[ $1 =~ ^[A-Za-z]:\\ ]]; then
-  FILE=$FILE:${INPUT[1]}
-  CENTER=${INPUT[2]}
-fi
+case ${#INPUT[@]} in
+  1)
+    FILE=${INPUT[0]}
+    CENTER=''
+    ;;
+  2)
+    if [[ ${INPUT[1]} =~ ^[0-9]+$ ]]; then
+      FILE=${INPUT[0]}
+      CENTER=${INPUT[1]}
+    else
+      FILE=${INPUT[0]}:${INPUT[1]}
+      CENTER=''
+    fi
+    ;;
+  3)
+    FILE=${INPUT[0]}:${INPUT[1]}
+    CENTER=${INPUT[2]}
+    ;;
+  *)
+    FILE=${INPUT[0]}
+    CENTER=${INPUT[1]}
+    ;;
+esac
 
 if [[ -n "$CENTER" && ! "$CENTER" =~ ^[0-9] ]]; then
   exit 1

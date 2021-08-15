@@ -1,6 +1,8 @@
 fzf :heart: vim
 ===============
 
+This is a tiny fork to easily deploy a hacky fix for #1258.
+
 Things you can do with [fzf][fzf] and Vim.
 
 Rationale
